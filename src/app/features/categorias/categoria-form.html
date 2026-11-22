@@ -1,0 +1,51 @@
+<section class="mx-auto w-full max-w-[780px]">
+  <nav class="mb-4 flex items-center gap-2 text-[0.82rem] text-text-muted" aria-label="Ruta de navegación">
+    <a routerLink="/categorias" class="font-semibold text-primary hover:underline">Categorías</a>
+    <span aria-hidden="true">/</span>
+    <span>{{ esEdicion() ? 'Editar' : 'Nueva' }}</span>
+  </nav>
+
+  <app-page-header [titulo]="esEdicion() ? 'Editar categoría' : 'Nueva categoría'" [subtitulo]="esEdicion() ? 'Actualiza los datos de la categoría seleccionada.' : 'Crea una categoría para organizar tus publicaciones.'" />
+
+  @if (cargando()) {
+    <app-loading-state mensaje="Cargando categoría." />
+  } @else {
+    <form class="flex flex-col gap-[1.4rem] rounded-[14px] border border-border bg-surface p-[1.6rem] shadow-card-sm" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+      @if (error()) { <app-alert [sinMargen]="true">{{ error() }}</app-alert> }
+
+      <app-form-field
+        label="Nombre"
+        forId="nombre"
+        [required]="true"
+        [error]="mostrarError('nombre') ? (form.controls.nombre.hasError('required') ? 'El nombre es obligatorio.' : 'El nombre no puede superar los 120 caracteres.') : ''"
+      >
+        <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Vehículos" autocomplete="off" [class]="mostrarError('nombre') ? 'w-full rounded-[10px] border border-danger bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:shadow-[0_0_0_3px_var(--color-danger-soft)] placeholder:text-slate-400' : 'w-full rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)] placeholder:text-slate-400'" />
+      </app-form-field>
+
+      <app-form-field
+        label="Descripción"
+        forId="descripcion"
+        [error]="mostrarError('descripcion') ? 'La descripción no puede superar los 1000 caracteres.' : ''"
+      >
+        <textarea id="descripcion" rows="4" formControlName="descripcion" placeholder="Describe qué tipo de publicaciones pertenecen a esta categoría." [class]="mostrarError('descripcion') ? 'min-h-[96px] w-full resize-y rounded-[10px] border border-danger bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:shadow-[0_0_0_3px_var(--color-danger-soft)] placeholder:text-slate-400' : 'min-h-[96px] w-full resize-y rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)] placeholder:text-slate-400'"></textarea>
+      </app-form-field>
+
+      <app-form-field labelText="Estado" hint="Las categorías inactivas no se muestran al crear nuevas publicaciones.">
+        <label class="relative inline-flex w-fit cursor-pointer select-none items-center gap-[0.6rem]">
+          <input type="checkbox" formControlName="estado" class="peer absolute h-px w-px opacity-0" />
+          <span class="relative h-[1.45rem] w-[2.6rem] shrink-0 rounded-full bg-slate-300 transition-colors after:absolute after:top-[0.175rem] after:left-[0.175rem] after:h-[1.1rem] after:w-[1.1rem] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(15,23,42,0.25)] after:transition-transform after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-[1.15rem] peer-focus-visible:shadow-[0_0_0_3px_var(--color-primary-soft)]" aria-hidden="true"></span>
+          <span class="text-[0.9rem] font-semibold">{{ form.controls.estado.value ? 'Activa' : 'Inactiva' }}</span>
+        </label>
+      </app-form-field>
+
+      <app-form-actions>
+        <a class="inline-flex w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-border bg-surface px-[1.05rem] py-[0.62rem] text-[0.9rem] font-semibold leading-[1.2] text-text transition duration-150 hover:border-slate-300 hover:bg-surface-2 sm:w-auto" routerLink="/categorias">Cancelar</a>
+        <button class="inline-flex w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-transparent bg-primary px-[1.05rem] py-[0.62rem] text-[0.9rem] font-semibold leading-[1.2] text-white shadow-[0_6px_16px_rgba(37,99,235,0.22)] transition duration-150 hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto" type="submit" [disabled]="guardando()">
+          @if (guardando()) { <span class="h-[0.85rem] w-[0.85rem] animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true"></span> }
+          {{ esEdicion() ? 'Guardar cambios' : 'Crear categoría' }}
+        </button>
+      </app-form-actions>
+    </form>
+  }
+</section>
+

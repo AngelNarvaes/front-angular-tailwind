@@ -1,0 +1,222 @@
+<section class="mx-auto w-full max-w-[860px]">
+  <nav
+    class="mb-4 flex items-center gap-2 text-[0.82rem] text-text-muted"
+    aria-label="Ruta de navegación"
+  >
+    <a routerLink="/publicaciones" class="font-semibold text-primary hover:underline"
+      >Publicaciones</a
+    >
+    <span aria-hidden="true">/</span>
+    <span>{{ esEdicion() ? 'Editar' : 'Nueva' }}</span>
+  </nav>
+
+  <app-page-header
+    [titulo]="esEdicion() ? 'Editar publicación' : 'Nueva publicación'"
+    [subtitulo]="
+      esEdicion()
+        ? 'Actualiza los datos del anuncio seleccionado.'
+        : 'Completa los datos del anuncio que quieres publicar.'
+    "
+  />
+
+  @if (cargando()) {
+    <app-loading-state mensaje="Cargando publicación." />
+  } @else {
+    <form
+      class="flex flex-col gap-[1.4rem] rounded-[14px] border border-border bg-surface p-[1.6rem] shadow-card-sm"
+      [formGroup]="form"
+      (ngSubmit)="guardar()"
+      novalidate
+    >
+      @if (error()) {
+        <app-alert [sinMargen]="true">{{ error() }}</app-alert>
+      }
+
+      @if (!cargandoCategorias() && categorias().length === 0) {
+        <app-alert tipo="warning" [sinMargen]="true">
+          <span>Necesitas al menos una categoría para crear publicaciones.</span>
+          <a
+            class="inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-border bg-surface px-3 py-[0.42rem] text-[0.8rem] font-semibold leading-[1.2] text-text transition duration-150 hover:border-slate-300 hover:bg-surface-2"
+            routerLink="/categorias/nueva"
+            >Crear categoría</a
+          >
+        </app-alert>
+      }
+
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <app-form-field
+          containerClass="flex min-w-0 flex-col gap-[0.42rem] sm:col-span-2"
+          label="Título"
+          forId="titulo"
+          [required]="true"
+          [error]="
+            mostrarError('titulo')
+              ? form.controls.titulo.hasError('required')
+                ? 'El título es obligatorio.'
+                : 'El título no puede superar los 150 caracteres.'
+              : ''
+          "
+        >
+          <input
+            id="titulo"
+            type="text"
+            formControlName="titulo"
+            placeholder="Ej. Bicicleta de montaña aro 29"
+            autocomplete="off"
+            [class]="
+              mostrarError('titulo')
+                ? 'w-full rounded-[10px] border border-danger bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:shadow-[0_0_0_3px_var(--color-danger-soft)] placeholder:text-slate-400'
+                : 'w-full rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)] placeholder:text-slate-400'
+            "
+          />
+        </app-form-field>
+
+        <app-form-field
+          containerClass="flex min-w-0 flex-col gap-[0.42rem] sm:col-span-2"
+          label="Descripción"
+          forId="descripcion"
+          [error]="
+            mostrarError('descripcion')
+              ? 'La descripción no puede superar los 2000 caracteres.'
+              : ''
+          "
+        >
+          <textarea
+            id="descripcion"
+            rows="5"
+            formControlName="descripcion"
+            placeholder="Detalla el estado, características y condiciones del artículo."
+            [class]="
+              mostrarError('descripcion')
+                ? 'min-h-[96px] w-full resize-y rounded-[10px] border border-danger bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:shadow-[0_0_0_3px_var(--color-danger-soft)] placeholder:text-slate-400'
+                : 'min-h-[96px] w-full resize-y rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)] placeholder:text-slate-400'
+            "
+          ></textarea>
+        </app-form-field>
+
+        <app-form-field
+          label="Precio"
+          forId="precio"
+          [required]="true"
+          [error]="
+            mostrarError('precio')
+              ? form.controls.precio.hasError('required')
+                ? 'El precio es obligatorio.'
+                : 'El precio debe ser mayor o igual a 0.'
+              : ''
+          "
+        >
+          <input
+            id="precio"
+            type="number"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            formControlName="precio"
+            placeholder="0.00"
+            [class]="
+              mostrarError('precio')
+                ? 'w-full rounded-[10px] border border-danger bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:shadow-[0_0_0_3px_var(--color-danger-soft)] placeholder:text-slate-400'
+                : 'w-full rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)] placeholder:text-slate-400'
+            "
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Categoría"
+          forId="categoriaId"
+          [required]="true"
+          [error]="mostrarError('categoriaId') ? 'Selecciona una categoría.' : ''"
+        >
+          <div class="relative">
+            <select
+              id="categoriaId"
+              formControlName="categoriaId"
+              [class]="
+                mostrarError('categoriaId')
+                  ? 'w-full cursor-pointer appearance-none rounded-[10px] border border-danger bg-surface px-[0.8rem] py-[0.62rem] pr-[2.2rem] text-text outline-none transition focus:shadow-[0_0_0_3px_var(--color-danger-soft)]'
+                  : 'w-full cursor-pointer appearance-none rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] pr-[2.2rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)]'
+              "
+            >
+              <option [ngValue]="null" disabled>
+                {{ cargandoCategorias() ? 'Cargando categorías.' : 'Selecciona una categoría' }}
+              </option>
+              @for (categoria of categorias(); track categoria.id) {
+                <option [ngValue]="categoria.id">
+                  {{ categoria.nombre }}{{ categoria.estado ? '' : ' (inactiva)' }}
+                </option>
+              }
+            </select>
+            <svg
+              class="pointer-events-none absolute right-[0.8rem] top-1/2 h-2 w-3 -translate-y-1/2 text-slate-500"
+              viewBox="0 0 12 8"
+              aria-hidden="true"
+            >
+              <path
+                d="M1 1l5 5 5-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </app-form-field>
+
+        <app-form-field
+          label="Estado"
+          forId="estado"
+          hint="«Activo» se muestra en el catálogo; «Pausado» y «Vendido» quedan como historial."
+        >
+          <div class="relative">
+            <select
+              id="estado"
+              class="w-full cursor-pointer appearance-none rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] pr-[2.2rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)]"
+              formControlName="estado"
+            >
+              @for (estado of estados; track estado) {
+                <option [value]="estado">{{ estado | titlecase }}</option>
+              }
+            </select>
+            <svg
+              class="pointer-events-none absolute right-[0.8rem] top-1/2 h-2 w-3 -translate-y-1/2 text-slate-500"
+              viewBox="0 0 12 8"
+              aria-hidden="true"
+            >
+              <path
+                d="M1 1l5 5 5-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </app-form-field>
+      </div>
+
+      <app-form-actions>
+        <a
+          class="inline-flex w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-border bg-surface px-[1.05rem] py-[0.62rem] text-[0.9rem] font-semibold leading-[1.2] text-text transition duration-150 hover:border-slate-300 hover:bg-surface-2 sm:w-auto"
+          routerLink="/publicaciones"
+          >Cancelar</a
+        >
+        <button
+          class="inline-flex w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-transparent bg-primary px-[1.05rem] py-[0.62rem] text-[0.9rem] font-semibold leading-[1.2] text-white shadow-[0_6px_16px_rgba(37,99,235,0.22)] transition duration-150 hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          type="submit"
+          [disabled]="guardando()"
+        >
+          @if (guardando()) {
+            <span
+              class="h-[0.85rem] w-[0.85rem] animate-spin rounded-full border-2 border-white/40 border-t-white"
+              aria-hidden="true"
+            ></span>
+          }
+          {{ esEdicion() ? 'Guardar cambios' : 'Crear publicación' }}
+        </button>
+      </app-form-actions>
+    </form>
+  }
+</section>

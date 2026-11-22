@@ -1,0 +1,84 @@
+<div class="grid min-h-screen grid-cols-1 md:grid-cols-[264px_minmax(0,1fr)]">
+  <aside
+    class="flex flex-row items-center gap-4 border-b border-border bg-surface px-4 py-[0.85rem] md:sticky md:top-0 md:h-screen md:flex-col md:items-stretch md:gap-8 md:border-b-0 md:border-r md:px-[1.1rem] md:py-[1.4rem]"
+  >
+    <a class="flex items-center gap-3 p-[0.25rem_0.4rem]" routerLink="/publicaciones">
+      <span
+        class="grid h-10 w-10 shrink-0 place-items-center rounded-xl from-primary to-violet-600 text-[1.05rem] font-extrabold text-white shadow-[0_6px_16px_rgba(37,99,235,0.28)]"
+        aria-hidden="true"
+        >A</span
+      >
+      <span class="hidden flex-col leading-tight min-[521px]:flex">
+        <strong class="text-base">Anuncios</strong>
+        <small class="hidden text-[0.72rem] text-text-muted md:block"
+          >Panel de administración</small
+        >
+      </span>
+    </a>
+
+    <nav
+      class="ml-auto flex flex-row gap-[0.15rem] min-[521px]:gap-[0.3rem] md:ml-0 md:flex-col"
+      aria-label="Navegación principal"
+    >
+      <a
+        routerLink="/publicaciones"
+        routerLinkActive="!bg-primary-soft !text-primary-dark"
+        class="flex items-center gap-[0.7rem] rounded-[10px] px-[0.6rem] py-2 text-[0.82rem] font-semibold text-text-muted transition-colors hover:bg-surface-2 hover:text-text min-[521px]:px-[0.7rem] min-[521px]:py-2 min-[521px]:text-[0.92rem] md:px-[0.85rem] md:py-[0.7rem]"
+      >
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+          <rect
+            x="3"
+            y="4"
+            width="18"
+            height="16"
+            rx="2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+          <path
+            d="M7 8h10M7 12h10M7 16h6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+        Publicaciones
+      </a>
+
+      <a
+        routerLink="/categorias"
+        routerLinkActive="!bg-primary-soft !text-primary-dark"
+        class="flex items-center gap-[0.7rem] rounded-[10px] px-[0.6rem] py-2 text-[0.82rem] font-semibold text-text-muted transition-colors hover:bg-surface-2 hover:text-text min-[521px]:px-[0.7rem] min-[521px]:py-2 min-[521px]:text-[0.92rem] md:px-[0.85rem] md:py-[0.7rem]"
+      >
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+          <path
+            d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linejoin="round"
+          />
+        </svg>
+        Categorías
+      </a>
+    </nav>
+
+    <div
+      class="mt-auto hidden items-center gap-2 border-t border-border px-[0.85rem] pt-[0.85rem] text-[0.75rem] text-text-muted md:flex"
+    >
+      <span
+        class="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_0_3px_#dcfce7]"
+        aria-hidden="true"
+      ></span>
+      API local · 127.0.0.1:3000
+    </div>
+  </aside>
+
+  <main class="min-w-0 px-4 pt-[1.35rem] pb-12 md:px-[clamp(1rem,4vw,2.5rem)] md:pt-8">
+    <router-outlet />
+  </main>
+</div>
+
+<app-notificacion />

@@ -1,0 +1,93 @@
+<section class="mx-auto w-full max-w-[1180px]">
+  <app-page-header eyebrow="Catálogo" titulo="Publicaciones" subtitulo="Administra los anuncios registrados en tu API.">
+    <a class="inline-flex w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-transparent bg-primary px-[1.05rem] py-[0.62rem] text-[0.9rem] font-semibold leading-[1.2] text-white shadow-[0_6px_16px_rgba(37,99,235,0.22)] transition duration-150 hover:bg-primary-dark sm:w-auto" routerLink="/publicaciones/nueva">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+      Nueva publicación
+    </a>
+  </app-page-header>
+
+  @if (error()) {
+    <app-alert>
+      <span>{{ error() }}</span>
+      <button class="inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-border bg-surface px-3 py-[0.42rem] text-[0.8rem] font-semibold leading-[1.2] text-text transition duration-150 hover:border-slate-300 hover:bg-surface-2" type="button" (click)="cargar()">Reintentar</button>
+    </app-alert>
+  }
+
+  <app-toolbar>
+    <app-search-field placeholder="Buscar por título o descripción" ariaLabel="Buscar publicaciones" [value]="busqueda()" (valueChange)="busqueda.set($event)" />
+    <div class="flex w-full flex-wrap items-center gap-[0.6rem] sm:w-auto">
+      <div class="relative w-full min-w-0 flex-[1_1_140px] sm:w-auto sm:min-w-[170px] sm:flex-none">
+        <select class="w-full cursor-pointer appearance-none rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] pr-[2.2rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)]" [value]="categoriaFiltro() ?? ''" (change)="onCategoriaFiltro($event)" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+          @for (categoria of categorias(); track categoria.id) { <option [value]="categoria.id">{{ categoria.nombre }}</option> }
+        </select>
+        <svg class="pointer-events-none absolute right-[0.8rem] top-1/2 h-2 w-3 -translate-y-1/2 text-slate-500" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="relative w-full min-w-0 flex-[1_1_140px] sm:w-auto sm:min-w-[170px] sm:flex-none">
+        <select class="w-full cursor-pointer appearance-none rounded-[10px] border border-border bg-surface px-[0.8rem] py-[0.62rem] pr-[2.2rem] text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--color-primary-soft)]" [value]="estadoFiltro()" (change)="onEstadoFiltro($event)" aria-label="Filtrar por estado">
+          <option value="">Todos los estados</option>
+          @for (estado of estados; track estado) { <option [value]="estado">{{ estado | titlecase }}</option> }
+        </select>
+        <svg class="pointer-events-none absolute right-[0.8rem] top-1/2 h-2 w-3 -translate-y-1/2 text-slate-500" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      @if (hayFiltros()) { <button class="inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-transparent px-3 py-[0.42rem] text-[0.8rem] font-semibold leading-[1.2] text-primary transition duration-150 hover:bg-primary-soft" type="button" (click)="limpiarFiltros()">Limpiar</button> }
+    </div>
+  </app-toolbar>
+
+  <div class="mb-[0.9rem] flex justify-between text-[0.85rem] text-text-muted">
+    <span>{{ filtradas().length }} de {{ publicaciones().length }} {{ publicaciones().length === 1 ? 'publicación' : 'publicaciones' }}</span>
+  </div>
+
+  @if (cargando()) {
+    <app-loading-state mensaje="Cargando publicaciones." />
+  } @else if (!error() && publicaciones().length === 0) {
+    <app-empty-state icono="📰" titulo="Todavía no hay publicaciones" mensaje="Crea tu primer anuncio para verlo listado aquí.">
+      <a class="inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-transparent bg-primary px-[1.05rem] py-[0.62rem] text-[0.9rem] font-semibold leading-[1.2] text-white shadow-[0_6px_16px_rgba(37,99,235,0.22)] transition duration-150 hover:bg-primary-dark" routerLink="/publicaciones/nueva">Crear publicación</a>
+    </app-empty-state>
+  } @else if (filtradas().length === 0) {
+    <app-empty-state icono="🔎" titulo="Sin resultados" mensaje="Ninguna publicación coincide con los filtros aplicados.">
+      <button class="inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-border bg-surface px-[1.05rem] py-[0.62rem] text-[0.9rem] font-semibold leading-[1.2] text-text transition duration-150 hover:border-slate-300 hover:bg-surface-2" type="button" (click)="limpiarFiltros()">Limpiar filtros</button>
+    </app-empty-state>
+  } @else {
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[1.1rem]">
+      @for (publicacion of filtradas(); track publicacion.id) {
+        <article class="flex flex-col gap-[0.85rem] rounded-[14px] border border-border bg-surface p-5 shadow-card-sm transition duration-150 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(15,23,42,0.1)]">
+          <div class="flex items-center justify-between gap-3">
+            <span [class]="
+              publicacion.estado === 'activo' ? 'inline-flex items-center whitespace-nowrap rounded-full bg-success-soft px-[0.62rem] py-[0.25rem] text-[0.72rem] font-bold capitalize text-success' :
+              publicacion.estado === 'pausado' ? 'inline-flex items-center whitespace-nowrap rounded-full bg-warning-soft px-[0.62rem] py-[0.25rem] text-[0.72rem] font-bold capitalize text-warning' :
+              publicacion.estado === 'vendido' ? 'inline-flex items-center whitespace-nowrap rounded-full bg-indigo-100 px-[0.62rem] py-[0.25rem] text-[0.72rem] font-bold capitalize text-indigo-700' :
+              'inline-flex items-center whitespace-nowrap rounded-full bg-slate-100 px-[0.62rem] py-[0.25rem] text-[0.72rem] font-bold capitalize text-text-muted'
+            ">{{ publicacion.estado }}</span>
+            <span class="text-[0.78rem] text-text-muted">{{ publicacion.fechaCreacion | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <h2 class="m-0 text-[1.1rem] font-bold leading-[1.35]">{{ publicacion.titulo }}</h2>
+          <p class="m-0 overflow-hidden text-[0.9rem] leading-[1.55] text-text-muted [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">{{ publicacion.descripcion || 'Sin descripción' }}</p>
+          <div class="mt-auto flex items-end justify-between gap-3 pt-[0.35rem]">
+            <span class="inline-flex items-center rounded-lg bg-indigo-50 px-[0.65rem] py-[0.28rem] text-[0.75rem] font-semibold text-indigo-800">{{ publicacion.categoria?.nombre || 'Sin categoría' }}</span>
+            <span class="flex flex-col items-end text-[1.1rem] font-bold text-text">
+              <small class="text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-text-muted">Precio</small>
+              {{ publicacion.precio | number: '1.2-2' }}
+            </span>
+          </div>
+          <div class="flex gap-[0.6rem] border-t border-border pt-[0.9rem]">
+            <a class="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-border bg-surface px-3 py-[0.42rem] text-[0.8rem] font-semibold leading-[1.2] text-text transition duration-150 hover:border-slate-300 hover:bg-surface-2" [routerLink]="['/publicaciones', publicacion.id, 'editar']">Editar</a>
+            <button class="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-transparent bg-danger-soft px-3 py-[0.42rem] text-[0.8rem] font-semibold leading-[1.2] text-red-700 transition duration-150 hover:bg-red-200" type="button" (click)="solicitarEliminacion(publicacion)">Eliminar</button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+@if (aEliminar(); as publicacion) {
+  <app-confirm-dialog
+    titulo="Eliminar publicación"
+    [mensaje]="'¿Seguro que quieres eliminar «' + publicacion.titulo + '»? Esta acción no se puede deshacer.'"
+    [cargando]="eliminando()"
+    (confirmar)="eliminar()"
+    (cancelar)="cerrarConfirmacion()"
+  />
+}
+
+
